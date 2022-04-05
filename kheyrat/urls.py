@@ -25,4 +25,5 @@ urlpatterns = [
     path('account/', include('rest_framework.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='toke_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='toke_refresh'),
+    path('v1/main/', include('main.urls')),
 ]

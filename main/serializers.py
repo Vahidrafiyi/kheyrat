@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from main.models import Fast, Prayer, Quran, Salavat
 import re
-from django_jalali.serializers.serializerfield import JDateTimeField
 
 class FastSerializer(serializers.ModelSerializer):
     # created_at = JDateTimeField()

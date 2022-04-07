@@ -10,8 +10,6 @@ class Profile(models.Model):
         FEMALE = 'female'
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    first_name = models.CharField(max_length=24, null=True, blank=True)
-    last_name = models.CharField(max_length=24, null=True, blank=True)
     phone = PhoneField(null=True, blank=True)
     gender = models.CharField(max_length=10, choices=Gender.choices, default=Gender.MALE)
     image = models.ImageField(upload_to='media/images/profile', null=True, blank=True)

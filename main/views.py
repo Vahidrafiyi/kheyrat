@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from account.models import Profile
+from account.serializers import ProfileSerializer
 from main.models import Fast, Prayer, Quran, CharityList
 from main.serializers import FastSerializer, PrayerSerializer, QuranSerializer, SalavatSerializer, CharityListSerializer
 
@@ -70,4 +71,5 @@ class CharityUnAcceptedList(APIView):
         if charity.charity_type == 'salavat':
             user.salavat += charity.quantity
         user.save()
+        serializer = ProfileSerializer()
         return Response({'data':'accepted'}, status=200)

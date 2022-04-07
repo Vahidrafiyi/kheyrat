@@ -1,10 +1,15 @@
 from rest_framework import serializers
 from account.models import Profile
 import re
-class ProfileSerializer(serializers.Serializer):
+
+class ProfileSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    first_name = serializers.ReadOnlyField(source='user.first_name')
+    last_name = serializers.ReadOnlyField(source='user.last_name')
     class Meta:
         model = Profile
-        exlude = ['user']
+        fields = ['id', 'user', 'first_name', 'last_name', 'phone', 'gender', 'image',
+                  'fast', 'salavat', 'prayer', 'quran', 'created_at']
 
     def validate_phone(self, value):
         """

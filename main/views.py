@@ -1,13 +1,15 @@
+from itertools import chain
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from account.models import Profile
 from account.serializers import ProfileSerializer
-from main.models import Fast, Prayer, Quran, CharityList
+from main.models import Fast, Prayer, Quran, CharityList, Salavat
 from main.serializers import FastSerializer, PrayerSerializer, QuranSerializer, SalavatSerializer, CharityListSerializer
 
 
@@ -71,5 +73,35 @@ class CharityUnAcceptedList(APIView):
         if charity.charity_type == 'salavat':
             user.salavat += charity.quantity
         user.save()
-        serializer = ProfileSerializer()
-        return Response({'data':'accepted'}, status=200)
+        charity.delete()
+        # serializer = ProfileSerializer(user)
+        return Response({'result':'accepted'}, status=200)
+        # queryset_a = Fast.objects.all()
+        # queryset_b = Prayer.objects.all()
+        # queryset_c = Salavat.objects.all()
+        # queryset_d = Quran.objects.all()
+        #
+        # # Create an iterator for the querysets and turn it into a list.
+        # results_list = list(chain(queryset_a, queryset_b, queryset_c, queryset_d))
+        #
+        # # Build the list with items based on the FeedItemSerializer fields
+        # results = {}
+        # new_list = {'fast':[], 'salavat':[], 'prayer':[], 'quran':[]}
+        # for entry in results_list:
+        #     item_type = entry.__class__.__name__.lower()
+        #     if isinstance(entry, Fast):
+        #         serializer = FastSerializer(entry)
+        #         new_list['fast'].append(serializer.data)
+        #     if isinstance(entry, Prayer):
+        #         serializer = PrayerSerializer(entry)
+        #         new_list['prayer'].append(serializer.data)
+        #     if isinstance(entry, Salavat):
+        #         serializer = SalavatSerializer(entry)
+        #         new_list['salavat'].append(serializer.data)
+        #     if isinstance(entry, Quran):
+        #         serializer = QuranSerializer(entry)
+        #         new_list['quran'].append(serializer.data)
+        #     results[item_type] = new_list[item_type]
+        # # print(new_list['fast'])
+        # return Response(results, status=200)
+

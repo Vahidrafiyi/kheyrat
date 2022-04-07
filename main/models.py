@@ -97,7 +97,6 @@ class CharityList(models.Model):
     def __str__(self):
         return self.charity_type
 
-# class Notification(models.Model):
 
 
 

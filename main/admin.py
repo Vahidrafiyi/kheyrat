@@ -23,4 +23,4 @@ class SalavatAdmin(admin.ModelAdmin):
 
 @register(CharityList)
 class CharityListAdmin(admin.ModelAdmin):
-    list_display = ('charity_type', 'quantity', 'created_at', 'accepted')
+    list_display = ('charity_type', 'quantity', 'accepted', 'created_at')

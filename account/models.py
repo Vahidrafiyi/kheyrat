@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from phone_field.models import PhoneField
 from django_jalali.db import models as jmodels
-user = get_user_model()
+
 class Profile(models.Model):
     class Gender(models.TextChoices):
         MALE = 'male'

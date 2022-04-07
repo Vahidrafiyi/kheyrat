@@ -7,5 +7,5 @@ urlpatterns = [
     path('prayer/', PrayerAPI.as_view()),
     path('quran/', QuranAPI.as_view()),
     path('salavat/', SalavatAPI.as_view()),
-    path('accept/<int:pk>/', CharityUnAcceptedList.as_view()),
+    path('accept/<int:pk>', CharityUnAcceptedList.as_view()),
 ]

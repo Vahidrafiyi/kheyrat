@@ -6,6 +6,10 @@ class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     first_name = serializers.ReadOnlyField(source='user.first_name')
     last_name = serializers.ReadOnlyField(source='user.last_name')
+    fast = serializers.ReadOnlyField()
+    salavat = serializers.ReadOnlyField()
+    prayer = serializers.ReadOnlyField()
+    quran = serializers.ReadOnlyField()
     class Meta:
         model = Profile
         fields = ['id', 'user', 'first_name', 'last_name', 'phone', 'gender', 'image',

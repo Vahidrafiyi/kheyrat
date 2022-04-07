@@ -34,7 +34,7 @@ class Prayer(models.Model):
 
     def save(self, *args, **kwargs):
         if self.user is not None:
-            self.user = ('+98') + self.user
+            self.user = ('+98') + str(self.user)
         super().save(*args, **kwargs)
 
 class Fast(models.Model):
@@ -43,12 +43,13 @@ class Fast(models.Model):
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     done = models.BooleanField(default=False)
 
+
     def __str__(self):
         return str(self.user)
 
     def save(self, *args, **kwargs):
         if self.user is not None:
-            self.user = ('+98') + self.user
+            self.user = ('+98') + str(self.user)
         super().save(*args, **kwargs)
 
 class Quran(models.Model):
@@ -62,12 +63,13 @@ class Quran(models.Model):
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     done = models.BooleanField(default=False)
 
+
     def __str__(self):
         return str(self.user)
 
     def save(self, *args, **kwargs):
         if self.user is not None:
-            self.user = ('+98') + self.user
+            self.user = ('+98') + str(self.user)
         super().save(*args, **kwargs)
 
 class Salavat(models.Model):
@@ -76,13 +78,27 @@ class Salavat(models.Model):
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     done = models.BooleanField(default=False)
 
+
     def __str__(self):
         return str(self.user)
 
     def save(self, *args, **kwargs):
         if self.user is not None:
-            self.user = ('+98') + self.user
+            self.user = ('+98') + str(self.user)
         super().save(*args, **kwargs)
+
+
+class CharityList(models.Model):
+    charity_type = models.CharField(max_length=16)
+    quantity = models.PositiveSmallIntegerField()
+    accepted = models.BooleanField(default=False)
+    created_at = jmodels.jDateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.charity_type
+
+# class Notification(models.Model):
+
 
 
 

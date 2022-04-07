@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from main.models import Fast, Prayer, Quran, Salavat
+from main.models import Fast, Prayer, Quran, Salavat, CharityList
 import re
 
 class FastSerializer(serializers.ModelSerializer):
@@ -73,3 +73,8 @@ class SalavatSerializer(serializers.ModelSerializer):
         if not re.search('^99[0-48]|^91[0-9]|^90[1-5]|^93[0-9]|^941|^92[0-2]', value):
             raise serializers.ValidationError('please enter the correct number (پیش شماره شما باید معتبر باشد)')
         return value
+
+class CharityListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityList
+        fields = '__all__'

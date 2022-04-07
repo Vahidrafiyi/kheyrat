@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import register
-from main.models import Fast, Quran, Prayer, Salavat
+from main.models import Fast, Quran, Prayer, Salavat, CharityList
 
 
 @register(Prayer)
@@ -20,3 +20,7 @@ class QuranAdmin(admin.ModelAdmin):
 @register(Salavat)
 class SalavatAdmin(admin.ModelAdmin):
     list_display = ('user', 'how_many', 'created_at', 'done')
+
+@register(CharityList)
+class CharityListAdmin(admin.ModelAdmin):
+    list_display = ('charity_type', 'quantity', 'created_at', 'accepted')

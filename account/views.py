@@ -19,13 +19,47 @@ class CurrentUserProfile(APIView):
         serializer = ProfileSerializer(query)
         return Response(serializer.data, status=200)
 
+    def patch(self, request):
+        query = Profile.objects.get(user=request.user)
+        serializer = ProfileSerializer(query, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class Notification(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         query = CharityList.objects.filter(accepted=False)
-        if len(query) > 3:
-            query = query[len(query)-3:len(query)]
-        serializer = CharitySerializer(query, many=True)
+        fast_aggregate = CharityList.objects.filter(acceptor=request.user, charity_type='روزه').aggregate(sum=Sum('quantity'))
+        prayer_aggregate = CharityList.objects.filter(
+            Q(acceptor=request.user, charity_type='نماز واجب') | Q(acceptor=request.user,
+            charity_type='نماز مستحب') | Q(acceptor=request.user,charity_type='یک روز کامل')).aggregate(sum=Sum('quantity'))
+        salavat_aggregate = CharityList.objects.filter(acceptor=request.user, charity_type='صلوات').aggregate(sum=Sum('quantity'))
+        quran_aggregate = CharityList.objects.filter(acceptor=request.user, charity_type='قرآن').aggregate(sum=Sum('quantity'))
+        print(query)
+        query_set = []
+        for instance in query:
+            if instance.charity_type == 'روزه' and fast_aggregate['sum'] != None and fast_aggregate['sum'] >= 60:
+                pass
+
+            elif (instance.charity_type == 'نماز واجب' or instance.charity_type == 'نماز مستحب' or instance.charity_type == 'یک روز کامل')\
+                    and prayer_aggregate['sum'] != None and prayer_aggregate['sum'] >= 700 :
+                pass
+
+            elif instance.charity_type == 'fast' and quran_aggregate['sum'] != None and quran_aggregate['sum'] >= 144 :
+                pass
+
+            elif instance.charity_type == 'fast' and salavat_aggregate['sum'] != None and salavat_aggregate['sum'] >= 10000 :
+                pass
+
+            else:
+                query_set.append(instance)
+        print(query_set)
+        if len(query_set) > 3:
+            query_set = query_set[len(query_set)-3:len(query_set)]
+
+        serializer = CharitySerializer(query_set, many=True)
         return Response(serializer.data, status=200)
 
 class UnAcceptedCharityList(APIView):
@@ -36,7 +70,7 @@ class UnAcceptedCharityList(APIView):
         return Response(serializer.data, status=200)
 
 class AcceptCharity(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     def get(self, request, pk):
         charity = CharityList.objects.get(pk=pk)
         charity.accepted = True
@@ -126,3 +160,6 @@ class DoneCharity(APIView):
         charity.save()
         user.save()
         return Response({'result':'charity done'}, status=200)
+
+# class CurrentUserCharity(APIView):
+#     def get(self, request):

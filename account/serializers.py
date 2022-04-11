@@ -1,20 +1,25 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from account.models import Profile
 import re
-
+class UserSerialzier(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name']
 class ProfileSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
-    first_name = serializers.ReadOnlyField(source='user.first_name')
-    last_name = serializers.ReadOnlyField(source='user.last_name')
-    fast = serializers.ReadOnlyField()
-    salavat = serializers.ReadOnlyField()
-    prayer = serializers.ReadOnlyField()
-    quran = serializers.ReadOnlyField()
+    user = UserSerialzier
     class Meta:
         model = Profile
-        fields = ['id', 'user', 'first_name', 'last_name', 'phone', 'gender', 'image',
-                  'fast', 'salavat', 'prayer', 'quran', 'created_at']
+        fields = ['id', 'user', 'phone', 'gender', 'image','created_at']
+        depth = 1
 
+    # def update(self, instance, validated_data):
+    #     instance.user.first_name = validated_data.get('first_name', instance.user.first_name)
+    #     # validated_data['last_name'] = self.last_name
+    #     # instance.save()
+    #     # super().update(instance, validated_data)
+    #     instance.save()
+    #     return instance
     def validate_phone(self, value):
         """
         Check that phone number is correct

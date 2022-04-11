@@ -47,10 +47,10 @@ class Notification(APIView):
                     and prayer_aggregate['sum'] != None and prayer_aggregate['sum'] >= 700 :
                 pass
 
-            elif instance.charity_type == 'fast' and quran_aggregate['sum'] != None and quran_aggregate['sum'] >= 144 :
+            elif (instance.charity_type == 'ختم' or instance.charity_type == 'جزء') and quran_aggregate['sum'] != None and quran_aggregate['sum'] >= 144 :
                 pass
 
-            elif instance.charity_type == 'fast' and salavat_aggregate['sum'] != None and salavat_aggregate['sum'] >= 10000 :
+            elif instance.charity_type == 'صلوات' and salavat_aggregate['sum'] != None and salavat_aggregate['sum'] >= 10000 :
                 pass
 
             else:
@@ -73,7 +73,6 @@ class AcceptCharity(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request, pk):
         charity = CharityList.objects.get(pk=pk)
-        charity.accepted = True
         user = Profile.objects.get(user_id=request.user.id)
         fast_aggregate = CharityList.objects.filter(acceptor=request.user, charity_type='روزه').aggregate(sum=Sum('quantity'))
         prayer_aggregate = CharityList.objects.filter(Q(acceptor=request.user , charity_type='نماز واجب') | Q(acceptor=request.user , charity_type='نماز مستحب') | Q(acceptor=request.user , charity_type='یک روز کامل')).aggregate(sum=Sum('quantity'))
@@ -83,34 +82,30 @@ class AcceptCharity(APIView):
         if charity.charity_type == 'روزه':
             if fast_aggregate != None and fast_aggregate['sum'] >= 60:
                 return Response({'error': 'سهمیه ی روزه شما تمام شده است'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-            user.fast += charity.quantity
             charity.accepted = True
             charity.acceptor = request.user
             charity.when_accepted = datetime.datetime.now()
         if charity.charity_type == 'نماز واجب' or charity.charity_type == 'نماز مستحب' or charity.charity_type == 'یک روز کامل':
             if prayer_aggregate != None and prayer_aggregate['sum'] >= 700:
                 return Response({'error': 'سهمیه ی نماز شما تمام شده است'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-            user.prayer += charity.quantity
             charity.accepted = True
             charity.acceptor = request.user
             charity.when_accepted = datetime.datetime.now()
         if charity.charity_type == 'جزء' or charity.charity_type == 'ختم':
             if quran_aggregate != None and quran_aggregate['sum'] >= 144:
                 return Response({'error': 'سهمیه ی قرآن شما تمام شده است'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-            user.quran += charity.quantity
             charity.accepted = True
             charity.acceptor = request.user
             charity.when_accepted = datetime.datetime.now()
         if charity.charity_type == 'صلوات':
             if salavat_aggregate != None and salavat_aggregate['sum'] >= 10000:
                 return Response({'error': 'سهمیه ی صلوات شما تمام شده است'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-            user.salavat += charity.quantity
             charity.accepted = True
             charity.acceptor = request.user
             charity.when_accepted = datetime.datetime.now()
         charity.save()
         user.save()
-        return Response({'result':'charity accepted'}, status=200)
+        return Response({'result':f'{charity.charity_type} accepted'}, status=200)
         # queryset_a = Fast.objects.all()
         # queryset_b = Prayer.objects.all()
         # queryset_c = Salavat.objects.all()
@@ -145,21 +140,10 @@ class DoneCharity(APIView):
     def get(self, request, pk):
         charity = CharityList.objects.get(pk=pk)
         user = Profile.objects.get(user_id=request.user.id)
-        if charity.charity_type == 'روزه':
-            user.fast -= charity.quantity
-
-        if charity.charity_type == 'نماز واجب' or charity.charity_type == 'نماز مستحب' or charity.charity_type == 'یک روز کامل':
-            user.prayer -= charity.quantity
-
-        if charity.charity_type == 'جزء' or charity.charity_type == 'ختم':
-            user.quran -= charity.quantity
-
-        if charity.charity_type == 'صلوات':
-            user.salavat -= charity.quantity
-
+        charity.done = True
         charity.save()
         user.save()
-        return Response({'result':'charity done'}, status=200)
+        return Response({'result' : f'{charity.charity_type} done'}, status=200)
 
 # class CurrentUserCharity(APIView):
 #     def get(self, request):

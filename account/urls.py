@@ -1,7 +1,9 @@
 from django.urls import path
-from account.views import CurrentUserProfile, Notification, UnAcceptedCharityList, AcceptCharity, DoneCharity
+from account.views import CurrentUserProfile, Notification, UnAcceptedCharityList, AcceptCharity, DoneCharity, \
+    RegisterAPI
 
 urlpatterns = [
+    path('register/', RegisterAPI.as_view()),
     path('profile/', CurrentUserProfile.as_view()),
     path('notification/', Notification.as_view()),
     path('unaccepted_charities/', UnAcceptedCharityList.as_view()),

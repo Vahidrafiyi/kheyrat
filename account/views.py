@@ -156,3 +156,10 @@ class RegisterAPI(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+class AllPurchaseAPI(APIView):
+    permission_classes = (AllowAny,)
+    def get(self, request, phone):
+        query_set = CharityList.objects.filter(user=phone)
+        serializer = CharitySerializer(query_set, many=True)
+        return Response(serializer.data, status=200)

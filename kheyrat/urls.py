@@ -20,11 +20,13 @@ from django.urls import path, include
 #     TokenObtainPairView,
 #     TokenRefreshView,
 # )
+from account.views import RegisterAPI
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('account/', include('rest_framework.urls')),
     path('account/', include('dj_rest_auth.urls')),
+    path('account/register/', RegisterAPI.as_view()),
     path('account/password/reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     # path('api/token/', TokenObtainPairView.as_view(), name='toke_obtain_pair'),
     # path('api/token/refresh/', TokenRefreshView.as_view(), name='toke_refresh'),

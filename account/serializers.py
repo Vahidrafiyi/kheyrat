@@ -18,18 +18,18 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         print(validated_data)
-        user_data = validated_data.pop('user')
-        user = instance.user
-        print(user_data.get('first_name'))
+        # user_data = validated_data.pop('user')
+        # user = instance.user
+        # print(user_data.get('first_name'))
 
         instance.gender = validated_data.get('gender', instance.gender)
         instance.save()
 
-        user.username = user_data.get('username', user.username)
-        user.first_name = user_data.get('first_name', user.first_name)
-        user.last_name = user_data.get('last_name', user.last_name)
-        print(user_data.get('first_name'))
-        user.save()
+        # user.username = user_data.get('username', user.username)
+        instance.user.first_name = validated_data['user'].get('first_name', instance.user.first_name)
+        # user.last_name = user_data.get('last_name', user.last_name)
+        # print(user_data.get('first_name'))
+        instance.user.save()
         return instance
 
     def validate_phone(self, value):

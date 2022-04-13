@@ -3,5 +3,5 @@ from django.contrib.admin import register
 from account.models import Profile
 
 @register(Profile)
-class SalavatAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone', 'created_at')
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('id','user', 'phone', 'created_at')

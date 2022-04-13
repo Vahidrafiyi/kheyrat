@@ -14,7 +14,7 @@ from main.serializers import CharitySerializer
 
 
 class CharityAPI(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     def post(self, request):
         serializer = CharitySerializer(data=request.data)
         if serializer.is_valid():

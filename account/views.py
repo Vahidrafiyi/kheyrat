@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from account.models import Profile
+from account.permissions import IsAdminUser
 from account.serializers import ProfileSerializer, RegisterSerializer
 from main.models import CharityList
 from main.serializers import CharitySerializer
@@ -157,9 +158,44 @@ class RegisterAPI(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-class AllPurchaseAPI(APIView):
+class UserPurchaseAPI(APIView):
     permission_classes = (AllowAny,)
     def get(self, request, phone):
         query_set = CharityList.objects.filter(user=phone)
         serializer = CharitySerializer(query_set, many=True)
         return Response(serializer.data, status=200)
+
+class AdminProfile(APIView):
+    permission_classes = (IsAdminUser,)
+    def get(self, request):
+        query_set = Profile.objects.all()
+        serializer = ProfileSerializer(query_set, many=True)
+        return Response(serializer.data, status=200)
+
+    def post(self, request):
+        serializer = ProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+    def patch(self, request, pk):
+        query = Profile.objects.get(pk=pk)
+        serializer = ProfileSerializer(query, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=202)
+        return Response(serializer.errors, status=400)
+
+    def delete(self, request, pk):
+        query = Profile.objects.get(pk=pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class AdminPurchase(APIView):
+    permission_classes = (IsAdminUser,)
+    def get(self, request):
+        query_set = CharityList.objects.all()
+        serializer = CharitySerializer(query_set, many=True)
+        return Response(serializer.data, status=200)
+

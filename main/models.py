@@ -1,8 +1,16 @@
+import random
+
 from django.contrib.auth.models import User
 from django.db import models
 
 from phone_field import PhoneField
 from django_jalali.db import models as jmodels
+
+def random_number_5():
+    random.seed()
+    ran = str(random.randint(10000, 99999))
+    finall_ran = '#'+ran
+    return finall_ran
 
 class CharityList(models.Model):
     CHARITY_TYPE = (
@@ -29,8 +37,8 @@ class CharityList(models.Model):
         ('نماز لیله الدفن', 'نماز لیله الدفن'),
         ('نماز شب', 'نماز شب'),
     )
-    user = PhoneField(blank=True, null=True, help_text='to send sms when charity done...')
-    info_for_who_mentioned = models.CharField(max_length=128, help_text='نام و نام خانوادگی کسی که برای روح او خیرات انجام می شود.')
+    user = PhoneField(help_text='to send sms when charity done...')
+    mentioned_info = models.CharField(max_length=128, help_text='نام و نام خانوادگی کسی که برای روح او خیرات انجام می شود.')
     charity_type = models.CharField(max_length=16, choices=CHARITY_TYPE, default=CHARITY_TYPE[0][0])
     prayer_sub_type = models.CharField(max_length=16, choices=PRAYER_SUB_TYPE, blank=True, null=True)
     quantity = models.PositiveSmallIntegerField()
@@ -38,6 +46,7 @@ class CharityList(models.Model):
     acceptor = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     when_accepted = jmodels.jDateTimeField(null=True, blank=True)
     done = models.BooleanField(default=False)
+    purchase_code = models.CharField(max_length=6, default=random_number_5, unique=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
 
     class Meta:
@@ -48,8 +57,7 @@ class CharityList(models.Model):
         return self.charity_type
 
     def save(self, *args, **kwargs):
-        if self.user is not None:
-            self.user = ('+98') + str(self.user)
+        self.user = '+98' + str(self.user)
         super().save(*args, **kwargs)
 
 

@@ -76,6 +76,7 @@ import re
 #         return value
 
 class CharitySerializer(serializers.ModelSerializer):
+    purchase_code = serializers.ReadOnlyField()
     class Meta:
         model = CharityList
         fields = '__all__'

@@ -23,4 +23,4 @@ from main.models import CharityList
 
 @register(CharityList)
 class CharityListAdmin(admin.ModelAdmin):
-    list_display = ('charity_type', 'user', 'quantity', 'accepted', 'acceptor', 'when_accepted', 'done')
+    list_display = ('charity_type', 'user', 'quantity', 'accepted', 'acceptor', 'done', 'purchase_code')

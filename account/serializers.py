@@ -4,6 +4,9 @@ from rest_framework import serializers
 from account.models import Profile
 import re
 
+from main.models import CharityList
+
+
 class UserSerialzier(serializers.ModelSerializer):
     class Meta:
         model = User

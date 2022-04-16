@@ -1,5 +1,6 @@
 import datetime
 
+from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -198,4 +199,41 @@ class AdminPurchase(APIView):
         query_set = CharityList.objects.all()
         serializer = CharitySerializer(query_set, many=True)
         return Response(serializer.data, status=200)
+
+class SearchPurchaseAPI(APIView):
+    permission_classes = (IsAdminUser,)
+    def get(self, request, search_by, search_t):
+        if search_by == 'user':
+            query = CharityList.objects.filter(user__icontains=search_t)
+
+        elif search_by == 'purchase_code':
+            query = CharityList.objects.filter(purchase_code__icontains=search_t)
+
+        elif search_by == 'mentioned_info':
+            query = CharityList.objects.filter(mentioned_info__icontains=search_t)
+
+        elif search_by == 'charity_type':
+            query = CharityList.objects.filter(charity_type__icontains=search_t)
+
+        elif search_by == 'acceptor':
+            query = CharityList.objects.filter(acceptor__username__icontains=search_t)
+
+        serializer = CharitySerializer(query, many=True)
+        return Response(serializer.data, status=200)
+
+class SearchUserAPI(APIView):
+    permission_classes = (IsAdminUser,)
+    def get(self, request, search_by, search_t):
+        if search_by == 'username':
+            query = Profile.objects.filter(user__username__icontains=search_t)
+
+        elif search_by == 'phone':
+            query = Profile.objects.filter(phone__icontains=search_t)
+
+        elif search_by == 'code_melli':
+            query = Profile.objects.filter(code_melli__icontains=search_t)
+
+        serializer = ProfileSerializer(query, many=True)
+        return Response(serializer.data, status=200)
+
 

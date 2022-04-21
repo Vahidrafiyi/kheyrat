@@ -1,19 +1,19 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from account.models import Profile
+from account.models import Profile, Pricing
 import re
 
 from main.models import CharityList
 
 
-class UserSerialzier(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username','first_name', 'last_name']
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerialzier()
+    user = UserSerializer()
     class Meta:
         model = Profile
         fields = ['user', 'phone','code_melli', 'gender', 'image','created_at']
@@ -84,3 +84,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
 
+class PricingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pricing
+        fields = '__all__'

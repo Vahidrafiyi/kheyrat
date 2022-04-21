@@ -37,7 +37,7 @@ class CharityList(models.Model):
         ('نماز لیله الدفن', 'نماز لیله الدفن'),
         ('نماز شب', 'نماز شب'),
     )
-    user = PhoneField(help_text='to send sms when charity done...')
+    user_phone = PhoneField(help_text='to send sms when charity done...')
     mentioned_info = models.CharField(max_length=128, help_text='نام و نام خانوادگی کسی که برای روح او خیرات انجام می شود.')
     charity_type = models.CharField(max_length=16, choices=CHARITY_TYPE, default=CHARITY_TYPE[0][0])
     prayer_sub_type = models.CharField(max_length=16, choices=PRAYER_SUB_TYPE, blank=True, null=True)
@@ -57,7 +57,7 @@ class CharityList(models.Model):
         return self.charity_type
 
     def save(self, *args, **kwargs):
-        self.user = '+98' + str(self.user)
+        self.user = '+98' + str(self.user_phone)
         super().save(*args, **kwargs)
 
 

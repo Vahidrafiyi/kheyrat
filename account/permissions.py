@@ -8,3 +8,11 @@ class IsAdminUser(BasePermission):
 
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_staff)
+
+class IsSuperAdmin(BasePermission):
+    """
+    Allows access only to super user.
+    """
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_superuser)

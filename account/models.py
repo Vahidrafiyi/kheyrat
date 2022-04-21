@@ -22,3 +22,35 @@ class Profile(models.Model):
     def save(self, *args, **kwargs):
         self.phone = '+98' + str(self.phone)
         super().save(*args, **kwargs)
+
+
+class Pricing(models.Model):
+    CHARITY = [
+            ('یک روز کامل', 'یک روز کامل'),
+            # قرآن
+            ('ختم', 'ختم'),
+            ('جزء', 'جزء'),
+
+            ('صلوات', 'صلوات'),
+
+            ('روزه', 'روزه'),
+            # نماز واجب
+            ('نماز آیات', 'نماز آیات'),
+            ('نماز نذر', 'نماز نذر'),
+            ('نماز احتیاط', 'نماز احتیاط'),
+            ('نماز میت', 'نماز میت'),
+            # نماز های مستحب
+            ('نماز نافله', 'نماز نافله'),
+            ('نماز جعفر طیار', 'نماز جعفر طیار'),
+            ('نماز لیله الدفن', 'نماز لیله الدفن'),
+            ('نماز شب', 'نماز شب'),
+    ]
+    charity = models.CharField(max_length=24, choices=CHARITY)
+    price = models.PositiveSmallIntegerField()
+
+    class Meta:
+        verbose_name_plural = 'pricing'
+        verbose_name = 'pricing'
+
+    def __str__(self):
+        return self.charity

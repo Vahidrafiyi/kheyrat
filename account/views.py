@@ -2,18 +2,18 @@ import datetime
 import re
 
 import django_filters
+import logging
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from rest_framework import status
 from rest_framework.generics import ListAPIView, GenericAPIView, ListCreateAPIView
-from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from account.models import Profile
-from account.permissions import IsAdminUser
-from account.serializers import ProfileSerializer, RegisterSerializer
+from account.models import Profile, Pricing
+from account.permissions import IsAdminUser, IsSuperAdmin
+from account.serializers import ProfileSerializer, RegisterSerializer, UserSerializer, PricingSerializer
 from main.models import CharityList
 from main.serializers import CharitySerializer
 
@@ -112,43 +112,15 @@ class AcceptCharity(APIView):
         charity.save()
         user.save()
         return Response({'result':f'{charity.charity_type} accepted'}, status=200)
-        # queryset_a = Fast.objects.all()
-        # queryset_b = Prayer.objects.all()
-        # queryset_c = Salavat.objects.all()
-        # queryset_d = Quran.objects.all()
-        #
-        # # Create an iterator for the querysets and turn it into a list.
-        # results_list = list(chain(queryset_a, queryset_b, queryset_c, queryset_d))
-        #
-        # # Build the list with items based on the FeedItemSerializer fields
-        # results = {}
-        # new_list = {'fast':[], 'salavat':[], 'prayer':[], 'quran':[]}
-        # for entry in results_list:
-        #     item_type = entry.__class__.__name__.lower()
-        #     if isinstance(entry, Fast):
-        #         serializer = FastSerializer(entry)
-        #         new_list['fast'].append(serializer.data)
-        #     if isinstance(entry, Prayer):
-        #         serializer = PrayerSerializer(entry)
-        #         new_list['prayer'].append(serializer.data)
-        #     if isinstance(entry, Salavat):
-        #         serializer = SalavatSerializer(entry)
-        #         new_list['salavat'].append(serializer.data)
-        #     if isinstance(entry, Quran):
-        #         serializer = QuranSerializer(entry)
-        #         new_list['quran'].append(serializer.data)
-        #     results[item_type] = new_list[item_type]
-        # # print(new_list['fast'])
-        # return Response(results, status=200)
 
 class DoneCharity(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request, pk):
         charity = CharityList.objects.get(pk=pk)
-        user = Profile.objects.get(user_id=request.user.id)
+        # user = Profile.objects.get(user_id=request.user.id)
         charity.done = True
         charity.save()
-        user.save()
+        # user.save()
         return Response({'result' : f'{charity.charity_type} done'}, status=200)
 
 # class CurrentUserCharity(APIView):
@@ -163,8 +135,10 @@ class RegisterAPI(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+
+
 class UserPurchaseAPI(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     def get(self, request, phone):
         query_set = CharityList.objects.filter(user=phone)
         serializer = CharitySerializer(query_set, many=True)
@@ -176,7 +150,7 @@ class UserPurchaseAPI(APIView):
 class CharityPurchaseFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = CharityList
-        fields = {'user':['icontains'],
+        fields = {'user_phone':['icontains'],
                   'mentioned_info':['icontains'],
                   'purchase_code':['icontains']}
 
@@ -192,10 +166,7 @@ class UsersFilter(django_filters.rest_framework.FilterSet):
 
 
 class AdminProfile(APIView):
-    permission_classes = (AllowAny,)
-    filterset_class = UsersFilter
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+    permission_classes = (IsAdminUser, IsSuperAdmin)
     def get(self, request):
         data = request.query_params
         query_set = Profile.objects.filter(Q(code_melli__icontains=data['code_melli']) & Q(phone__icontains=data['phone']) &
@@ -224,48 +195,40 @@ class AdminProfile(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class AdminPurchase(ListAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser, IsSuperAdmin)
     queryset = CharityList.objects.all()
     serializer_class = CharitySerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filterset_class = CharityPurchaseFilter
 
+class AddAdmin(APIView):
+    permission_classes = (AllowAny,)
+    def get(self, request, pk):
+        user = User.objects.get(pk=pk)
+        if user.is_staff == True:
+            return Response({'error': f'user {user.username} is now admin'}, status=status.HTTP_400_BAD_REQUEST)
+        user.is_staff = True
+        user.save()
+        return Response({'result':f'user {user.username} selected as admin'}, status=status.HTTP_202_ACCEPTED)
 
+class PricingAPI(APIView):
+    permission_classes = (AllowAny,)
+    def get(self, request):
+        query_set = Pricing.objects.all()
+        serializer = PricingSerializer(query_set, many=True)
+        return Response(serializer.data, status=200)
 
-# class SearchPurchaseAPI(APIView):
-#     permission_classes = (IsAdminUser,)
-#     def get(self, request, search_by, search_t):
-#         if search_by == 'user':
-#             query = CharityList.objects.filter(user__icontains=search_t)
-#
-#         elif search_by == 'purchase_code':
-#             query = CharityList.objects.filter(purchase_code__icontains=search_t)
-#
-#         elif search_by == 'mentioned_info':
-#             query = CharityList.objects.filter(mentioned_info__icontains=search_t)
-#
-#         elif search_by == 'charity_type':
-#             query = CharityList.objects.filter(charity_type__icontains=search_t)
-#
-#         elif search_by == 'acceptor':
-#             query = CharityList.objects.filter(acceptor__username__icontains=search_t)
-#
-#         serializer = CharitySerializer(query, many=True)
-#         return Response(serializer.data, status=200)
+    def post(self, request):
+        serializer = PricingSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
-# class SearchUserAPI(APIView):
-#     permission_classes = (IsAdminUser,)
-#     def get(self, request, search_by, search_t):
-#         if search_by == 'username':
-#             query = Profile.objects.filter(user__username__icontains=search_t)
-#
-#         elif search_by == 'phone':
-#             query = Profile.objects.filter(phone__icontains=search_t)
-#
-#         elif search_by == 'code_melli':
-#             query = Profile.objects.filter(code_melli__icontains=search_t)
-#
-#         serializer = ProfileSerializer(query, many=True)
-#         return Response(serializer.data, status=200)
-
-
+    def patch(self, request, pk):
+        query = Pricing.objects.get(pk=pk)
+        serializer = PricingSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=202)
+        return Response(serializer.errors, status=400)
